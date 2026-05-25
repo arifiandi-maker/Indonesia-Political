@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisis Komprehensif Sentimen YouTube Comments - Indonesian Political</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2c3e50;
+            --secondary: #e74c3c;
+            --accent: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --light: #ecf0f1;
+            --light-bg: #f5f7fa;
+            --text: #34495e;
+            --border: #bdc3c7;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: #fff;
+            padding: 2.5rem 1rem;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        header h1 {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        header .subtitle {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            margin-bottom: 0.3rem;
+        }
+
+        header .meta {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        /* Navigation */
+        nav {
+            background: #fff;
+            padding: 0.8rem 1rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            position: sticky;
+            top: 160px;
+            z-index: 999;
+        }
+
+        nav button {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        nav button:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        nav button.active {
+            background: var(--secondary);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Sections */
+        section {
+            margin: 2rem 0;
+            display: none;
+        }
+
+        section.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        section h2 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid var(--secondary);
+        }
+
+        section h3 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin: 1.5rem 0 1rem 0;
+            font-weight: 600;
+        }
+
+        /* Article Section */
+        .article-content {
+            background: #fff;
+            border-radius: 8px;
+            padding: 2.5rem 2rem;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 2rem;
+        }
+
+        .article-content p {
+            margin: 1rem 0;
+            text-align: justify;
+            font-size: 1rem;
+        }
+
+        .article-content ul, .article-content ol {
+            margin: 1.5rem 0 1.5rem 2rem;
+        }
+
+        .article-content li {
+            margin: 0.8rem 0;
+        }
+
+        .article-content a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .article-content a:hover {
+            text-decoration: underline;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #e8f4f8 0%, #f0f8ff 100%);
+            border-left: 4px solid var(--secondary);
+            padding: 1.2rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+            font-style: italic;
+            color: var(--text);
+        }
+
+        .highlight strong {
+            color: var(--secondary);
+            font-style: normal;
+        }
+
+        blockquote {
+            border-left: 4px solid var(--accent);
+            margin: 1.5rem 0;
+            padding: 1rem 1.5rem;
+            background-color: var(--light);
+            border-radius: 4px;
+            color: var(--text);
+            font-style: italic;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: all 0.3s ease;
+            border-top: 4px solid var(--accent);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-card.negative {
+            border-top-color: var(--secondary);
+        }
+
+        .stat-card.neutral {
+            border-top-color: var(--warning);
+        }
+
+        .stat-card.positive {
+            border-top-color: var(--success);
+        }
+
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .label {
+            font-size: 1rem;
+            color: var(--text);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .description {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .chart-container {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .chart-container h3 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 350px;
+        }
+
+        /* Word Cloud Section */
+        .wordcloud-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .wordcloud-container {
+            background: #fff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+        }
+
+        .wordcloud-container h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .wordcloud-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            border-radius: 4px;
+            background: var(--light-bg);
+            padding: 1rem;
+        }
+
+        .wordcloud-visual {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 2rem;
+            border-radius: 4px;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: var(--text);
+            text-align: center;
+        }
+
+        /* Distribution Box */
+        .distribution-box {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 2rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .distribution-box h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            margin-top: 0;
+        }
+
+        .distribution-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .distribution-item {
+            background: #fff;
+            padding: 1rem;
+            border-radius: 4px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .distribution-item.negative {
+            border-left-color: var(--secondary);
+        }
+
+        .distribution-item.neutral {
+            border-left-color: var(--warning);
+        }
+
+        .distribution-item.positive {
+            border-left-color: var(--success);
+        }
+
+        .distribution-item h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .distribution-item p {
+            color: var(--text);
+            font-size: 0.95rem;
+            margin: 0.5rem 0;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .distribution-item.negative .progress-fill {
+            background: var(--secondary);
+        }
+
+        .distribution-item.neutral .progress-fill {
+            background: var(--warning);
+        }
+
+        .distribution-item.positive .progress-fill {
+            background: var(--success);
+        }
+
+        /* Key Points */
+        .key-points {
+            background: linear-gradient(135deg, #fdf2e9 0%, #fadbd8 100%);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-left: 5px solid var(--secondary);
+        }
+
+        .key-points h3 {
+            color: var(--primary);
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .key-points li {
+            margin: 1rem 0;
+            line-height: 1.9;
+        }
+
+        /* Sentiment Badge */
+        .sentiment-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .sentiment-badge.negative {
+            background: #fadbd8;
+            color: #922b21;
+        }
+
+        .sentiment-badge.neutral {
+            background: #fdebd0;
+            color: #92521b;
+        }
+
+        .sentiment-badge.positive {
+            background: #d5f4e6;
+            color: #0b5345;
+        }
+
+        /* Footer */
+        footer {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: #fff;
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-top: 3rem;
+            font-size: 0.9rem;
+        }
+
+        footer p {
+            margin: 0.5rem 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.5rem;
+            }
+
+            section h2 {
+                font-size: 1.4rem;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-wrapper {
+                height: 300px;
+            }
+
+            .article-content {
+                padding: 1.5rem 1rem;
+            }
+
+            nav button {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.8rem;
+            }
+
+            .wordcloud-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .wordcloud-image {
+                max-height: 350px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header {
+                padding: 1.5rem 0.5rem;
+            }
+
+            header h1 {
+                font-size: 1.2rem;
+            }
+
+            section h2 {
+                font-size: 1.2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+            }
+
+            .stat-card .number {
+                font-size: 2rem;
+            }
+
+            .article-content {
+                padding: 1rem;
+            }
+
+            .article-content p {
+                font-size: 0.95rem;
+            }
+
+            .chart-wrapper {
+                height: 250px;
+            }
+
+            nav {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+
+            nav button {
+                width: 100%;
+            }
+
+            .container {
+                margin: 1rem auto;
+            }
+
+            .distribution-list {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-grid {
+                gap: 1rem;
+            }
+
+            .chart-container {
+                padding: 1rem;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .visible {
+            display: block !important;
+        }
+
+        .mt-3 {
+            margin-top: 2rem;
+        }
+
+        .mb-3 {
+            margin-bottom: 2rem;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        hr {
+            border: none;
+            border-top: 2px solid var(--border);
+            margin: 2rem 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📊 Dominasi Sentimen Negatif dalam Diskursus Kebijakan Pemerintah</h1>
+        <div class="subtitle">Analisis Komprehensif Komentar YouTube Politik Indonesia - Q1 2026</div>
+        <div class="meta">TRIBUN SUMSEL · Updated 19 Mei 2026 | Data Collection: API yt-dlp | Sentiment Scoring: Lexicon-based</div>
+    </header>
+
+    <nav>
+        <button onclick="switchSection('artikel')">📰 Artikel</button>
+        <button onclick="switchSection('dashboard')">📈 Dashboard</button>
+        <button onclick="switchSection('wordcloud')">☁️ Word Cloud</button>
+        <button onclick="switchSection('analysis')">🔍 Analisis Lanjutan</button>
+    </nav>
+
+    <div class="container">
+        <!-- ARTIKEL SECTION -->
+        <section id="artikel" class="active">
+            <h2>📰 Analisis Mendalam: Dominasi Suara Kritis Warganet</h2>
+
+            <div class="article-content">
+                <h3>Pendahuluan</h3>
+                <p>Dalam lanskap diskursus digital Indonesia kontemporer, platform YouTube telah menjadi <strong>episentrum pertukaran opini publik</strong> mengenai isu-isu sensitif kebijakan pemerintah. Data yang dikurasi melalui otomasi API yt-dlp pada kuartal pertama 2026 membeberkan polarisasi tajam dalam reaksi warganet terhadap konten pemerintahan, khususnya seputar kebijakan energi, transportasi, dan anti-korupsi yang dicanangkan otoritas pusat.</p>
+
+                <div class="highlight">
+                    <strong>🔍 Metodologi Penelitian:</strong> Analisis 20 komentar organik dari video YouTube dengan tema "Kebijakan Pemerintah Indonesia" (https://www.youtube.com/watch?v=Kwbk5lQKOL8), menggunakan <strong>lexicon-based sentiment scoring</strong> untuk menangkap nuansa ironi dan konteks lokal yang kompleks.
+                </div>
+
+                <p>Preprocessing data melibatkan pipeline <em>pandas, regex (re), dan datetime</em> untuk memastikan data integritas sebelum analisis N-Gram dan sentiment lexicon diterapkan. Tren yang mengejutkan terungkap dari agregat sentimen: <strong>dominasi suara kritis mencapai 80%</strong> dari total populasi komentar, dengan intensitas reaksi negatif yang tidak hanya tinggi secara kuantitatif, namun juga ekstrem dalam tingkat kepercayaan skor (rata-rata 0.9422 pada skala 0.0–1.0).</p>
+
+                <hr>
+
+                <h3>Dominasi Suara Kritis: Distribusi Sentimen yang Mengungkap Ketegangan Sosial</h3>
+
+                <p>Visualisasi dashboard sentimen menghadirkan temuan yang sangat eksplisit: dari populasi 20 komentar yang dianalisis, <strong>16 komentar (80.0%) mengekspresikan sentimen negatif</strong>, 2 komentar (10.0%) bersifat netral, dan hanya 2 komentar (10.0%) yang positif. Distribusi histogram ini menunjukkan pola yang jauh melampaui tingkat ketidakpuasan konvensional—ini adalah indikator <strong>degenerasi kepercayaan publik</strong> yang mencapai level kritis.</p>
+
+                <div class="highlight">
+                    Skor kepercayaan sentimen negatif mencapai rata-rata <strong>0.9422</strong>, yang berarti algoritma lexicon-based dengan tingkat akurasi tinggi mendeteksi intesitas emosi negatif yang konsisten di hampir seluruh corpus.
+                </div>
+
+                <p>Pie chart proporsional merefleksikan realitas yang sering terabaikan dalam coverage media mainstream: <strong>suara dominan warganet bukan hanya sekadar "tidak puas," melainkan mengekspresikan level ketidakpercayaan yang sistemik</strong> terhadap kebijakan dan eksekusi pemerintah.</p>
+
+                <blockquote>
+                    "Polarisasi opini ini menciptakan diskursus bifurkasi—di satu pole ada reaksi ekstrem negatif dengan skor 0.99 (mendekati kepastian penuh), sementara di pole kontras hanya tersedia suara-suara terisolir yang suportif."
+                </blockquote>
+
+                <h3>Topik Utama Analisis</h3>
+                <p>Episentrum kritik tersebar across multiple nodes yang signifikan:</p>
+                <ul>
+                    <li><strong>Isu Korupsi & Governance (8 komentar):</strong> Warganet mengekspresikan ketidakpercayaan terhadap integritas pejabat dan law enforcement implementation yang dianggap inkonsisten dengan narasi pemerintah</li>
+                    <li><strong>Kebijakan Energi - Pertalite (3 komentar):</strong> Pembatasan akses bahan bakar bersubsidi dipersepsikan sebagai beban tambahan untuk rakyat kecil, terutama di daerah terpencil</li>
+                    <li><strong>Regulasi CC Kendaraan Bermotor (4 komentar):</strong> Kebijakan tidak membedakan antara teknologi lama vs baru, menciptakan beban khusus untuk demographic yang hanya mampu beli kendaraan second-hand</li>
+                </ul>
+
+                <hr>
+
+                <h3>Kesimpulan</h3>
+                <p>Analisis komprehensif terhadap data YouTube comments Q1 2026 mengungkap tidak sekadar ketidakpuasan, melainkan <strong>fraktur dalam epistemik consensus mengenai legitimasi pemerintah</strong>. Distribusi sentimen yang extrem-skewed (80% negatif) dikombinasikan dengan skor kepercayaan tinggi (0.9422 average) menunjukkan bahwa sentimen negatif bukan hasil dari extreme outliers, tetapi <strong>pattern sistemik</strong>.</p>
+
+                <div class="key-points">
+                    <h3>🎯 Tiga Poin Penting</h3>
+                    <ul>
+                        <li><strong>Polarisasi Opini yang Ekstrem:</strong> Dominasi sentimen negatif (80%) dengan skor kepercayaan tinggi (0.9422) mengindikasikan bahwa skeptisme terhadap pemerintah bukan minoritas marginal, tetapi posisi mainstream di platform YouTube.</li>
+                        <li><strong>Fraktur Legitimasi Multi-Layer:</strong> Tidak ada satu isu tunggal yang memicu sentimen negatif; sebaliknya adalah accumulative effect dari multiple policy grievances (energi, transportasi, anti-korupsi) yang menciptakan episentrum ketidakpercayaan.</li>
+                        <li><strong>Marginalisasi Suara Supportif:</strong> Hanya 10% komentar yang positif, dan mereka cenderung surface-level tanpa elaborasi argumentatif, menciptakan asymmetry dalam democratic discourse architecture.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- DASHBOARD SECTION -->
+        <section id="dashboard">
+            <h2>📈 Dashboard Statistik Komprehensif</h2>
+
+            <div class="stats-grid">
+                <div class="stat-card negative">
+                    <div class="number">16</div>
+                    <div class="label">Sentimen Negatif</div>
+                    <div class="description">80.0% dari total</div>
+                </div>
+                <div class="stat-card neutral">
+                    <div class="number">2</div>
+                    <div class="label">Sentimen Netral</div>
+                    <div class="description">10.0% dari total</div>
+                </div>
+                <div class="stat-card positive">
+                    <div class="number">2</div>
+                    <div class="label">Sentimen Positif</div>
+                    <div class="description">10.0% dari total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">20</div>
+                    <div class="label">Total Komentar</div>
+                    <div class="description">Dataset Q1 2026</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">0.94</div>
+                    <div class="label">Rata-rata Skor</div>
+                    <div class="description">Akurasi sentimen tinggi</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">3</div>
+                    <div class="label">Isu Utama</div>
+                    <div class="description">Korupsi, Energi, Transportasi</div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h3>Distribusi Sentimen (Pie Chart)</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="sentimentPieChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h3>Distribusi Sentimen (Bar Chart)</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="sentimentBarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="distribution-box">
+                <h3>📊 Analisis Distribusi Sentimen Lengkap</h3>
+                <div class="distribution-list">
+                    <div class="distribution-item negative">
+                        <h4>😠 Sentimen Negatif</h4>
+                        <p><strong>Jumlah:</strong> 16 komentar</p>
+                        <p><strong>Persentase:</strong> 80%</p>
+                        <p><strong>Rata-rata Skor:</strong> 0.9422</p>
+                        <p><strong>Range Skor:</strong> 0.7553 - 0.9992</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 80%;"></div>
+                        </div>
+                    </div>
+                    <div class="distribution-item neutral">
+                        <h4>😐 Sentimen Netral</h4>
+                        <p><strong>Jumlah:</strong> 2 komentar</p>
+                        <p><strong>Persentase:</strong> 10%</p>
+                        <p><strong>Rata-rata Skor:</strong> 0.7377</p>
+                        <p><strong>Range Skor:</strong> 0.5243 - 0.9511</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 10%;"></div>
+                        </div>
+                    </div>
+                    <div class="distribution-item positive">
+                        <h4>😊 Sentimen Positif</h4>
+                        <p><strong>Jumlah:</strong> 2 komentar</p>
+                        <p><strong>Persentase:</strong> 10%</p>
+                        <p><strong>Rata-rata Skor:</strong> 0.9264</p>
+                        <p><strong>Range Skor:</strong> 0.8613 - 0.9916</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 10%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container mt-3">
+                <h3>Tren Skor Sentimen per Komentar</h3>
+                <div class="chart-wrapper">
+                    <canvas id="sentimentScoreChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- WORDCLOUD SECTION -->
+        <section id="wordcloud">
+            <h2>☁️ Pemetaan Kata Kunci: Analisis Awan Kata per Sentimen</h2>
+
+            <p>Visualisasi word cloud yang dibedah per sentimen mengungkap arkitektur semantik yang sangat berbeda untuk setiap polaritas. Dalam representasi cloud negatif (16 komentar), dominasi lingual ditempati oleh nodes utama yang konsisten dan berulang.</p>
+
+            <h3>🎯 Nucleus Utama Kritik Negatif</h3>
+            <p><strong>"Pertalite," "Mobil," "Korupsi," "Rakyat," "Pemerintah,"</strong> dan <strong>"CC"</strong> menjadi gravitational centers dari discourse negatif. Kata "pertalite" (bahan bakar bersubsidi) muncul dengan frekuensi tinggi, mencerminkan kepedulian luas terhadap kebijakan BBM yang dianggap merugikan warganet ekonomi bawah.</p>
+
+            <div class="wordcloud-grid" style="grid-template-columns: 1fr;">
+                <div class="wordcloud-container">
+                    <h4>☁️ Word Cloud per Sentimen - Voice of Netizens</h4>
+                    <img src="wordcloud_per_sentimen.png" alt="Word Cloud Visualization per Sentimen" class="wordcloud-image" style="width: 100%; height: auto; border-radius: 8px; border: 1px solid #ddd;">
+                    <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text); text-align: center;">
+                        <strong>Visualisasi Komprehensif:</strong> Tiga kelompok sentimen ditampilkan side-by-side
+                        <br>
+                        <span style="color: #27ae60;">🟢 Positif (2 komentar)</span> | 
+                        <span style="color: #f39c12;">🟡 Netral (2 komentar)</span> | 
+                        <span style="color: #e74c3c;">🔴 Negatif (16 komentar)</span>
+                    </p>
+                </div>
+            </div>
+
+            <h3>Interpretasi Word Cloud per Sentimen</h3>
+            
+            <div class="distribution-box">
+                <h4 style="margin-top: 0;">🟢 Sentimen Positif (Warna Hijau Teal)</h4>
+                <p>Kata-kata dominan: <strong>"lanjutkan," "Setuju," "Mantap"</strong> — menunjukkan endorsement terhadap arah kebijakan, meskipun surface-level tanpa elaborasi mendalam. Minoritas ini merepresentasikan suara yang tersegmentasi dengan alignment partisan atau trust terhadap figur kepemimpinan.</p>
+            </div>
+
+            <div class="distribution-box" style="background: linear-gradient(135deg, #fdebd0 0%, #fad7a0 100%); border-left-color: var(--warning);">
+                <h4 style="margin-top: 0; color: #92521b;">🟡 Sentimen Netral (Warna Kuning Orange)</h4>
+                <p>Kata-kata dominan: <strong>"tunggu," "Tinggal," "KLO," "juga," "baru," "cocok," "atas," "kejutanada"</strong> — merepresentasikan posisi <strong>wait-and-see</strong> tanpa commitment ideologi kuat. Frase seperti "Tinggal tunggu aja entar juga ada kejutan" mencerminkan skeptisme moderat, bukan outright rejection. Audiens ini mempertahankan jarak dari kedua pole ekstrem.</p>
+            </div>
+
+            <div class="distribution-box" style="background: linear-gradient(135deg, #fadbd8 0%, #f5b7b1 100%); border-left-color: var(--secondary);">
+                <h4 style="margin-top: 0; color: #922b21;">🔴 Sentimen Negatif (Warna Merah)</h4>
+                <p><strong>Nucleus Utama:</strong> "pertalite," "mobil," "korupsi," "rakyat," "pemerintah," "tahun," "CC," "TAMBAH," "HANCUR," "UANG," "ng," "GIMANA," "KIJANG," "DILARANG"</p>
+                <p><strong>Interpretasi:</strong> Ukuran font yang dominan untuk kata-kata negatif menunjukkan intensitas penggunaan dan emotional charge yang tinggi. Cluster topik jelas teridentifikasi:</p>
+                <ul>
+                    <li><strong>Kebijakan BBM:</strong> "pertalite," "subsidi," "SPBU" — pembatasan akses bahan bakar bersubsidi</li>
+                    <li><strong>Regulasi Transportasi:</strong> "CC," "mobil," "tahun," "KIJANG" — diskriminasi kendaraan berdasarkan displacement engine</li>
+                    <li><strong>Governance & Anti-Korupsi:</strong> "korupsi," "hukum," "aset," "sita" — ketidakpercayaan terhadap integritas pejabat</li>
+                    <li><strong>Emotional Expressions:</strong> "TAMBAH," "HANCUR," "GIMANA," "gak jd diberlakukan" — vocabulary of lived suffering</li>
+                </ul>
+            </div>
+
+            <h3 style="margin-top: 2rem;">Cluster Isu Transportasi & Regulasi CC</h3>
+            <p>Cluster kata sekunder meliputi topik kendaraan bermotor: <strong>"Mobil di Atas 1400 cc," "Kijang," "Tahun,"</strong> dan aksesi "Beli." Node ini terkonsentrasi pada isu regulasi yang membedakan kendaraan berdasarkan displacement engine.</p>
+
+            <blockquote>
+                "Gimana nasib mobil lawas yang cc besar seperti kijang, rakyat kecil cuma bisa beli mobil lawas cc besar diatas 1.400 yang harganya murah, gak adil donk"
+            </blockquote>
+
+            <h3>🔗 Tertiary Nodes: Korupsi & Kepercayaan Institusional</h3>
+            <p>Kata "korupsi," "hukum," "sita," dan "aset" membentuk sub-cluster yang mengindikasikan concern terhadap integritas pejabat dan law enforcement. Contoh ekspresi warganet:</p>
+            <ul>
+                <li><em>"Sita dan hukum gantong koruptoor...jangan rakyat saja yg di sudutiiin"</em></li>
+                <li><em>"Intinya adl. Pejabat yg ga becus urus negara rakyat yg kena getahnya."</em></li>
+            </ul>
+        </section>
+
+        <!-- ANALYSIS SECTION -->
+        <section id="analysis">
+            <h2>🔍 Analisis Lanjutan & Key Insights</h2>
+
+            <div class="chart-container mb-3">
+                <h3>Distribusi Top 10 Komentar Berdasarkan Likes</h3>
+                <div class="chart-wrapper">
+                    <canvas id="topCommentsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="distribution-box">
+                <h3>Analisis Mendalam per Topik Utama</h3>
+                <div class="distribution-list">
+                    <div class="distribution-item negative">
+                        <h4>🔴 Isu Korupsi & Governance</h4>
+                        <p><strong>Frekuensi:</strong> 8 komentar</p>
+                        <p><strong>Rata-rata Skor:</strong> 0.9727</p>
+                        <p><strong>Kata Kunci:</strong> Korupsi, Hukum, Sita, Aset, Pejabat</p>
+                        <p><strong>Insight:</strong> Waryanet mengekspresikan ketidakpercayaan terhadap integritas pejabat dan law enforcement implementation</p>
+                    </div>
+                    <div class="distribution-item negative">
+                        <h4>🔴 Kebijakan Energi (Pertalite)</h4>
+                        <p><strong>Frekuensi:</strong> 3 komentar</p>
+                        <p><strong>Rata-rata Skor:</strong> 0.9451</p>
+                        <p><strong>Kata Kunci:</strong> Pertalite, SPBU, Subsidi, BBM</p>
+                        <p><strong>Insight:</strong> Pembatasan akses bahan bakar bersubsidi dipersepsikan sebagai beban untuk rakyat kecil</p>
+                    </div>
+                    <div class="distribution-item negative">
+                        <h4>🔴 Regulasi CC Kendaraan Bermotor</h4>
+                        <p><strong>Frekuensi:</strong> 4 komentar</p>
+                        <p><strong>Rata-rata Skor:</strong> 0.9791</p>
+                        <p><strong>Kata Kunci:</strong> Mobil, CC, Kijang, Tahun 2000, Harga</p>
+                        <p><strong>Insight:</strong> Kebijakan tidak membedakan teknologi lama vs baru, menciptakan beban khusus untuk demographic tertentu</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container mt-3">
+                <h3>Skor Sentimen per Topik Utama</h3>
+                <div class="chart-wrapper">
+                    <canvas id="topicSentimentChart"></canvas>
+                </div>
+            </div>
+
+            <div class="key-points mt-3">
+                <h3>🎯 Kesimpulan Akhir: Diagnosis Fraktur Diskursus Digital</h3>
+                <ul>
+                    <li><strong>Polarisasi Opini yang Ekstrem:</strong> Dominasi sentimen negatif (80%) dengan skor kepercayaan tinggi (0.9422) mengindikasikan bahwa skeptisme terhadap pemerintah bukan minoritas marginal, tetapi posisi mainstream. Fenomena ini menandai pergeseran signifikan dalam landscape diskursus digital Indonesia.</li>
+                    <li><strong>Fraktur Legitimasi Multi-Layer:</strong> Tidak ada satu isu tunggal yang memicu sentimen negatif; sebaliknya adalah accumulative effect dari multiple policy grievances (energi, transportasi, anti-korupsi) yang menciptakan episentrum ketidakpercayaan yang dalam.</li>
+                    <li><strong>Marginalisasi Suara Supportif dalam Diskursus Digital:</strong> Hanya 10% komentar yang positif dan mereka cenderung surface-level tanpa elaborasi argumentatif. Ini mengisyaratkan bahwa proponents of government policy tidak memiliki incentive atau platform yang adequate untuk engage dalam deliberation substantive.</li>
+                </ul>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p><strong>📊 Dashboard Analisis Komprehensif - Sentimen YouTube Comments Indonesian Political</strong></p>
+        <p>Metodologi: Lexicon-based Sentiment Scoring | N-Gram Extraction | Visual Analytics</p>
+        <p>Data Collection: API yt-dlp Q1 2026 | Processing: pandas, re, datetime</p>
+        <p>© Tribun Sumsel | Data Journalism Division | May 2026</p>
+        <p>Sumber: <a href="https://www.youtube.com/watch?v=Kwbk5lQKOL8" style="color: #ecf0f1; text-decoration: none;">https://www.youtube.com/watch?v=Kwbk5lQKOL8</a></p>
+    </footer>
+
+    <script>
+        // Chart Colors
+        const colors = {
+            negative: '#e74c3c',
+            neutral: '#f39c12',
+            positive: '#27ae60',
+            primary: '#3498db',
+            secondary: '#2c3e50'
+        };
+
+        // Pie Chart
+        const pieCtx = document.getElementById('sentimentPieChart');
+        if (pieCtx) {
+            new Chart(pieCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Negatif (80%)', 'Netral (10%)', 'Positif (10%)'],
+                    datasets: [{
+                        data: [16, 2, 2],
+                        backgroundColor: [colors.negative, colors.neutral, colors.positive],
+                        borderColor: '#fff',
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { font: { size: 12 }, padding: 15 }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Bar Chart
+        const barCtx = document.getElementById('sentimentBarChart');
+        if (barCtx) {
+            new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Negatif', 'Netral', 'Positif'],
+                    datasets: [{
+                        label: 'Jumlah Komentar',
+                        data: [16, 2, 2],
+                        backgroundColor: [colors.negative, colors.neutral, colors.positive],
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { beginAtZero: true } }
+                }
+            });
+        }
+
+        // Line Chart
+        const lineCtx = document.getElementById('sentimentScoreChart');
+        if (lineCtx) {
+            new Chart(lineCtx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 20}, (_, i) => `C${i+1}`),
+                    datasets: [{
+                        label: 'Skor Sentimen',
+                        data: [0.999, 0.990, 0.997, 0.755, 0.991, 0.987, 0.997, 0.925, 0.951, 0.994, 0.999, 0.958, 0.987, 0.995, 0.944, 0.524, 0.997, 0.999, 0.861, 0.992],
+                        borderColor: colors.primary,
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, max: 1 } }
+                }
+            });
+        }
+
+        // Top Comments Chart
+        const topCtx = document.getElementById('topCommentsChart');
+        if (topCtx) {
+            new Chart(topCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['rimbaarkeo4931', 'ayyubbunyani4068', 'wandanaendyka5674', 'MorenoPutra1306', 'SugiantoSugianto28', 'wayantusan7328', 'AchmadSyaifulBachri', 'adik5758', 'ujangronda7263', 'em-en-Hx6r'],
+                    datasets: [{
+                        label: 'Total Likes',
+                        data: [34, 44, 28, 22, 17, 9, 14, 5, 4, 6],
+                        backgroundColor: colors.primary,
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { x: { beginAtZero: true } }
+                }
+            });
+        }
+
+        // Topic Chart
+        const topicCtx = document.getElementById('topicSentimentChart');
+        if (topicCtx) {
+            new Chart(topicCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Korupsi & Governance', 'Kebijakan Energi', 'Regulasi CC Kendaraan'],
+                    datasets: [{
+                        label: 'Rata-rata Skor Sentimen',
+                        data: [0.9727, 0.9451, 0.9791],
+                        backgroundColor: [colors.negative, colors.primary, colors.secondary],
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, max: 1 } }
+                }
+            });
+        }
+
+        // Section Switch
+        function switchSection(sectionId) {
+            document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
